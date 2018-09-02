@@ -1,0 +1,18 @@
+pkg.name: apps/usb_app
+pkg.type: app
+pkg.description: Tinyusb example.
+pkg.author: "Ha Thach <thach@tinyusb.org>"
+pkg.homepage: "https://github.com/hathach/tinyusb"
+pkg.keywords:
+    - usb
+
+pkg.deps:
+    - "@apache-mynewt-core/kernel/os"
+    - "@apache-mynewt-core/hw/hal"
+    - "@apache-mynewt-core/sys/console/stub"
+    - "@tinyusb/tinyusb"
+
+pkg.cflags: 
+    - -DARRAY_SIZE(arr)=(sizeof(arr)/sizeof((arr)[0]))
+    - -DASSERT=NRFX_ASSERT
+    - "-I@tinyusb/src"
