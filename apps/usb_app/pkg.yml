@@ -15,4 +15,5 @@ pkg.deps:
 pkg.cflags: 
     - -DARRAY_SIZE(arr)=(sizeof(arr)/sizeof((arr)[0]))
     - -DASSERT=NRFX_ASSERT
+    - -DNRFX_POWER_ENABLED=1 -DNRFX_POWER_CONFIG_IRQ_PRIORITY=7
     - "-I@tinyusb/src"

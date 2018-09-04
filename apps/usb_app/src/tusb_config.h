@@ -52,8 +52,8 @@
 #define CFG_TUSB_DEBUG              0
 
 /*------------- RTOS -------------*/
-#define CFG_TUSB_OS                 OPT_OS_NONE
-#define CFG_TUD_TASK_PRIO           (configMAX_PRIORITIES-2) // TASK_PRIO_HIGH = Bluefruit Task
+#define CFG_TUSB_OS                 OPT_OS_MYNEWT
+#define CFG_TUD_TASK_PRIO           2
 //#define CFG_TUD_TASK_QUEUE_SZ     16
 //#define CFG_TUD_TASK_STACK_SZ     150
 

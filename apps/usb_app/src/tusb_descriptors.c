@@ -1,5 +1,6 @@
 /**************************************************************************/
 /*!
+    @file     tusb_descriptors.c
     @author   hathach (tinyusb.org)
 
     @section LICENSE
@@ -34,86 +35,64 @@
     This file is part of the tinyusb stack.
 */
 /**************************************************************************/
-#include <assert.h>
-#include <string.h>
 
-#include "sysinit/sysinit.h"
-#include "os/os.h"
-#include "bsp/bsp.h"
-#include "hal/hal_gpio.h"
-#ifdef ARCH_sim
-#include "mcu/mcu_sim.h"
-#endif
-
-#include "nrfx_power.h"
 #include "tusb.h"
 
-static volatile int g_task1_loops;
+//--------------------------------------------------------------------+
+// STRING DESCRIPTORS
+//--------------------------------------------------------------------+
 
-/* For LED toggling */
-int g_led_pin;
-
-/**
- * main
- *
- * The main task for the project. This function initializes packages,
- * and then blinks the BSP LED in a loop.
- *
- * @return int NOTE: this function should never return!
- */
-int
-main(int argc, char **argv)
+// array of pointer to string descriptors
+uint16_t const * const string_desc_arr [] =
 {
-    int rc;
+    // 0: is supported language = English
+    TUD_DESC_STRCONV(0x0409),
 
-#ifdef ARCH_sim
-    mcu_sim_parse_args(argc, argv);
+    // 1: Manufacturer
+    TUD_DESC_STRCONV('t', 'i', 'n', 'y', 'u', 's', 'b', '.', 'o', 'r', 'g'),
+
+    // 2: Product
+    TUD_DESC_STRCONV('t', 'i', 'n', 'y', 'u', 's', 'b', ' ', 'd', 'e', 'v', 'i', 'c', 'e'),
+
+    // 3: Serials TODO use chip ID
+    TUD_DESC_STRCONV('1', '2', '3', '4', '5', '6'),
+
+#if CFG_TUD_CDC
+    // 4: CDC Interface
+    TUD_DESC_STRCONV('t','u','s','b',' ','c','d','c'),
 #endif
 
-    sysinit();
+#if CFG_TUD_MSC
+    // 5: MSC Interface
+    TUD_DESC_STRCONV('t','u','s','b',' ','m','s','c'),
+#endif
 
+#if CFG_TUD_HID_KEYBOARD
+    // 6: Keyboard
+    TUD_DESC_STRCONV('t','u','s','b',' ','k','e','y','b','o','a','r','d'),
+#endif
 
-    // Power module init
-    const nrfx_power_config_t pwr_cfg = { 0 };
-    nrfx_power_init(&pwr_cfg);
+#if CFG_TUD_HID_MOUSE
+    // 7: Mouse
+    TUD_DESC_STRCONV('t','u','s','b',' ','m', 'o','u','s','e'),
+#endif
 
-    /* tinyusb function that handles power event (detected, ready, removed)
-     * We must call it within SD's SOC event handler, or set it as power event handler if SD is not enabled.
-     */
-    extern void tusb_hal_nrf_power_event(uint32_t event);
+};
 
-    // Register tusb function as USB power handler
-    const nrfx_power_usbevt_config_t config = { .handler = (nrfx_power_usb_event_handler_t) tusb_hal_nrf_power_event };
-    nrfx_power_usbevt_init(&config);
+// tud_desc_set is required by tinyusb stack
+// since CFG_TUD_DESC_AUTO is enabled, we only need to set string_arr 
+tud_desc_set_t tud_desc_set =
+{
+    .device     = NULL,
+    .config     = NULL,
 
-    nrfx_power_usbevt_enable();
+    .string_arr   = (uint8_t const **) string_desc_arr,
+    .string_count = sizeof(string_desc_arr)/sizeof(string_desc_arr[0]),
 
-    uint32_t usb_reg = NRF_POWER->USBREGSTATUS;
-
-    if ( usb_reg & POWER_USBREGSTATUS_VBUSDETECT_Msk ) {
-      tusb_hal_nrf_power_event(NRFX_POWER_USB_EVT_DETECTED);
+    .hid_report =
+    {
+        .generic       = NULL,
+        .boot_keyboard = NULL,
+        .boot_mouse    = NULL
     }
-
-    if ( usb_reg & POWER_USBREGSTATUS_OUTPUTRDY_Msk ) {
-      tusb_hal_nrf_power_event(NRFX_POWER_USB_EVT_READY);
-    }
-
-    tusb_init();
-
-    g_led_pin = LED_BLINK_PIN;
-    hal_gpio_init_out(g_led_pin, 1);
-
-    while (1) {
-        ++g_task1_loops;
-
-        /* Wait one second */
-        os_time_delay(OS_TICKS_PER_SEC);
-
-        /* Toggle the LED */
-        hal_gpio_toggle(g_led_pin);
-    }
-    assert(0);
-
-    return rc;
-}
-
+};
