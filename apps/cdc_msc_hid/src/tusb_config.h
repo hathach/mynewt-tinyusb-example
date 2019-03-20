@@ -46,16 +46,17 @@
 //--------------------------------------------------------------------
 // COMMON CONFIGURATION
 //--------------------------------------------------------------------
-#define CFG_TUSB_MCU                OPT_MCU_NRF5X
+// defined by compiler flags for flexibility
+#ifndef CFG_TUSB_MCU
+  #error CFG_TUSB_MCU must be defined
+#endif
+
 #define CFG_TUSB_RHPORT0_MODE       OPT_MODE_DEVICE
 
 #define CFG_TUSB_DEBUG              0
 
 /*------------- RTOS -------------*/
 #define CFG_TUSB_OS                 OPT_OS_MYNEWT
-#define CFG_TUD_TASK_PRIO           2
-//#define CFG_TUD_TASK_QUEUE_SZ     16
-//#define CFG_TUD_TASK_STACK_SZ     150
 
 //--------------------------------------------------------------------
 // DEVICE CONFIGURATION

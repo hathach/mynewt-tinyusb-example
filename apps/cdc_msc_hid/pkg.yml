@@ -1,4 +1,4 @@
-pkg.name: apps/usb_app
+pkg.name: apps/cdc_msc_hid
 pkg.type: app
 pkg.description: Tinyusb example.
 pkg.author: "Ha Thach <thach@tinyusb.org>"
@@ -13,7 +13,10 @@ pkg.deps:
     - "@tinyusb/tinyusb"
 
 pkg.cflags: 
+    - -DCFG_TUSB_MCU=OPT_MCU_NRF5X
     - -DARRAY_SIZE(arr)=(sizeof(arr)/sizeof((arr)[0]))
     - -DASSERT=NRFX_ASSERT
-    - -DNRFX_POWER_ENABLED=1 -DNRFX_POWER_CONFIG_IRQ_PRIORITY=7
+    - -DNRF52840_XXAA
+    - -DNRFX_POWER_CONFIG_IRQ_PRIORITY=7
     - "-I@tinyusb/src"
+    #- -DNRFX_POWER_ENABLED=1 redefined error due to nrfx52840_config.h

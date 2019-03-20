@@ -1,3 +1,0 @@
-target.app: "apps/usb_app"
-target.bsp: "@apache-mynewt-core/hw/bsp/nrf52840pdk"
-target.build_profile: "debug"

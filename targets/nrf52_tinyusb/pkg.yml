@@ -1,4 +1,4 @@
-pkg.name: "targets/nrf52_usb_app"
+pkg.name: "targets/nrf52_tinyusb"
 pkg.type: "target"
 pkg.description: 
 pkg.author: 
