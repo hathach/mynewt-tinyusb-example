@@ -34,6 +34,6 @@ repository.apache-mynewt-core:
 
 repository.tinyusb:
     type: github
-    vers: 0.0.1
+    vers: 0-dev
     user: hathach
     repo: tinyusb    
