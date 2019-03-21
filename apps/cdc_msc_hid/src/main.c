@@ -34,22 +34,17 @@
 #include "mcu/mcu_sim.h"
 #endif
 
-#include "nrfx_power.h"
 #include "tusb.h"
 
-static volatile int g_task1_loops;
-
-/* tinyusb function that handles power event (detected, ready, removed)
- * We must call it within SD's SOC event handler, or set it as power event handler if SD is not enabled.
- */
-extern void tusb_hal_nrf_power_event(uint32_t event);
+// TODO refractor to pkg.yml or target yml later
+#ifdef NRF52840_XXAA
+#include "nrfx_power.h"
+#endif
 
 #define USBD_STACK_SIZE   128
 static struct os_task usbd_tsk;
 static os_stack_t usbd_stack[OS_STACK_ALIGN(USBD_STACK_SIZE)];
 
-void POWER_CLOCK_IRQHandler(void);
-void USBD_IRQHandler(void);
 void usb_device_task(void* param);
 
 int main (int argc, char **argv)
@@ -62,16 +57,27 @@ int main (int argc, char **argv)
 
   sysinit();
 
-  NVIC_SetVector(POWER_CLOCK_IRQn, (uint32_t) POWER_CLOCK_IRQHandler);
+// TODO refractor to pkg.yml or target yml later
+#ifdef NRF52840_XXAA
+  extern void nrfx_power_clock_irq_handler(void);
+  extern void USBD_IRQHandler(void);
+
+  NVIC_SetVector(POWER_CLOCK_IRQn, (uint32_t) nrfx_power_clock_irq_handler);
   NVIC_SetVector(USBD_IRQn, (uint32_t) USBD_IRQHandler);
   NVIC_SetPriority(USBD_IRQn, 2);
 
   // Power module init
-  nrf_power_dcdcen_set(0);
-  nrf_power_int_enable(NRF_POWER_INT_USBDETECTED_MASK | NRF_POWER_INT_USBREMOVED_MASK | NRF_POWER_INT_USBPWRRDY_MASK);
+  const nrfx_power_config_t pwr_cfg = { 0 };
+  nrfx_power_init(&pwr_cfg);
 
-  NRFX_IRQ_PRIORITY_SET(POWER_CLOCK_IRQn, 3);
-  NRFX_IRQ_ENABLE(POWER_CLOCK_IRQn);
+  // tinyusb function that handles power event (detected, ready, removed)
+  // We must call it within SD's SOC event handler, or set it as power event handler if SD is not enabled.
+  extern void tusb_hal_nrf_power_event(uint32_t event);
+
+  // Register tusb function as USB power handler
+  const nrfx_power_usbevt_config_t config = { .handler = (nrfx_power_usb_event_handler_t) tusb_hal_nrf_power_event };
+  nrfx_power_usbevt_init(&config);
+  nrfx_power_usbevt_enable();
 
   uint32_t usb_reg = NRF_POWER->USBREGSTATUS;
 
@@ -84,6 +90,12 @@ int main (int argc, char **argv)
   {
     tusb_hal_nrf_power_event(NRFX_POWER_USB_EVT_READY);
   }
+#endif
+
+// TODO refractor to pkg.yml or target yml later
+#ifdef STM32F407xx
+
+#endif
 
   tusb_init();
 
@@ -94,16 +106,14 @@ int main (int argc, char **argv)
 
   while ( 1 )
   {
-    ++g_task1_loops;
-
     /* Wait one second */
     os_time_delay(OS_TICKS_PER_SEC);
 
     /* Toggle the LED */
     hal_gpio_toggle(LED_BLINK_PIN);
   }
-  assert(0);
 
+  assert(0);
   return rc;
 }
 
@@ -118,47 +128,5 @@ void usb_device_task(void* param)
   {
     // tinyusb device task
     tud_task();
-  }
-}
-
-
-void POWER_CLOCK_IRQHandler (void)
-{
-  uint32_t enabled = nrf_power_int_enable_get();
-
-  if ( (0 != (enabled & NRF_POWER_INT_POFWARN_MASK)) &&
-       nrf_power_event_get_and_clear(NRF_POWER_EVENT_POFWARN) )
-  {
-    /* Cannot be null if event is enabled */
-//        NRFX_ASSERT(m_pofwarn_handler != NULL);
-//        m_pofwarn_handler();
-  }
-
-  if ( (0 != (enabled & NRF_POWER_INT_SLEEPENTER_MASK)) &&
-       nrf_power_event_get_and_clear(NRF_POWER_EVENT_SLEEPENTER) )
-  {
-    /* Cannot be null if event is enabled */
-//        NRFX_ASSERT(m_sleepevt_handler != NULL);
-//        m_sleepevt_handler(NRFX_POWER_SLEEP_EVT_ENTER);
-  }
-  if ( (0 != (enabled & NRF_POWER_INT_SLEEPEXIT_MASK)) &&
-       nrf_power_event_get_and_clear(NRF_POWER_EVENT_SLEEPEXIT) )
-  {
-    /* Cannot be null if event is enabled */
-//        NRFX_ASSERT(m_sleepevt_handler != NULL);
-//        m_sleepevt_handler(NRFX_POWER_SLEEP_EVT_EXIT);
-  }
-
-  if ( (0 != (enabled & NRF_POWER_INT_USBDETECTED_MASK)) && (NRF_POWER_EVENT_USBDETECTED) )
-  {
-    tusb_hal_nrf_power_event(NRFX_POWER_USB_EVT_DETECTED);
-  }
-  if ( (0 != (enabled & NRF_POWER_INT_USBREMOVED_MASK)) && nrf_power_event_get_and_clear(NRF_POWER_EVENT_USBREMOVED) )
-  {
-    tusb_hal_nrf_power_event(NRFX_POWER_USB_EVT_REMOVED);
-  }
-  if ( (0 != (enabled & NRF_POWER_INT_USBPWRRDY_MASK)) && nrf_power_event_get_and_clear(NRF_POWER_EVENT_USBPWRRDY) )
-  {
-    tusb_hal_nrf_power_event(NRFX_POWER_USB_EVT_READY);
   }
 }

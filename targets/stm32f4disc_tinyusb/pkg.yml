@@ -4,3 +4,5 @@ pkg.description:
 pkg.author: 
 pkg.homepage: 
 
+pkg.cflags: 
+    - -DCFG_TUSB_MCU=OPT_MCU_STM32F4
