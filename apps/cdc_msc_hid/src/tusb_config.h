@@ -1,40 +1,27 @@
-/**************************************************************************/
-/*!
-    @file     tusb_config.h
-    @author   hathach (tinyusb.org)
-
-    @section LICENSE
-
-    Software License Agreement (BSD License)
-
-    Copyright (c) 2013, hathach (tinyusb.org)
-    All rights reserved.
-
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions are met:
-    1. Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in the
-    documentation and/or other materials provided with the distribution.
-    3. Neither the name of the copyright holders nor the
-    names of its contributors may be used to endorse or promote products
-    derived from this software without specific prior written permission.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
-    EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-    DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-    INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION HOWEVER CAUSED AND
-    ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-    INCLUDING NEGLIGENCE OR OTHERWISE ARISING IN ANY WAY OUT OF THE USE OF THIS
-    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-    This file is part of the tinyusb stack.
-*/
-/**************************************************************************/
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2018, hathach (tinyusb.org)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ */
 
 #ifndef _TUSB_CONFIG_H_
 #define _TUSB_CONFIG_H_
@@ -51,17 +38,33 @@
   #error CFG_TUSB_MCU must be defined
 #endif
 
+#if CFG_TUSB_MCU == OPT_MCU_LPC43XX || CFG_TUSB_MCU == OPT_MCU_LPC18XX
+#define CFG_TUSB_RHPORT0_MODE       (OPT_MODE_DEVICE | OPT_MODE_HIGH_SPEED)
+#else
 #define CFG_TUSB_RHPORT0_MODE       OPT_MODE_DEVICE
+#endif
 
-#define CFG_TUSB_DEBUG              0
-
-/*------------- RTOS -------------*/
+#define CFG_TUSB_DEBUG              2
 #define CFG_TUSB_OS                 OPT_OS_MYNEWT
+
+/* USB DMA on some MCUs can only access a specific SRAM region with restriction on alignment.
+ * Tinyusb use follows macros to declare transferring memory so that they can be put
+ * into those specific section.
+ * e.g
+ * - CFG_TUSB_MEM SECTION : __attribute__ (( section(".usb_ram") ))
+ * - CFG_TUSB_MEM_ALIGN   : __attribute__ ((aligned(4)))
+ */
+#ifndef CFG_TUSB_MEM_SECTION
+#define CFG_TUSB_MEM_SECTION
+#endif
+
+#ifndef CFG_TUSB_MEM_ALIGN
+#define CFG_TUSB_MEM_ALIGN          ATTR_ALIGNED(4)
+#endif
 
 //--------------------------------------------------------------------
 // DEVICE CONFIGURATION
 //--------------------------------------------------------------------
-
 #define CFG_TUD_ENDOINT0_SIZE       64
 
 /*------------- Descriptors -------------*/
@@ -73,18 +76,27 @@
  */
 #define CFG_TUD_DESC_AUTO           1
 
-#define CFG_TUD_DESC_VID            0x239A
-#define CFG_TUD_DESC_PID            0x8029
-
-/* USB VID/PID if not defined, tinyusb to use default value
+/* If USB VID/PID is not defined, tinyusb will use default value
  * Note: different class combination e.g CDC and (CDC + MSC) should have different
  * PID since Host OS will "remembered" device driver after the first plug */
 // #define CFG_TUD_DESC_VID          0xCAFE
 // #define CFG_TUD_DESC_PID          0x0001
 
+// LPC 17xx and 40xx endpoint type (bulk/interrupt/iso) are fixed by its number
+// Therefore we need to force endpoint number to correct type on lpc17xx
+#if CFG_TUSB_MCU == OPT_MCU_LPC175X_6X || CFG_TUSB_MCU == OPT_MCU_LPC177X_8X || CFG_TUSB_MCU == OPT_MCU_LPC40XX
+#define CFG_TUD_DESC_CDC_EPNUM_NOTIF      1
+#define CFG_TUD_DESC_CDC_EPNUM            2
+#define CFG_TUD_DESC_MSC_EPNUM            5
+#define CFG_TUD_DESC_HID_KEYBOARD_EPNUM   4
+#define CFG_TUD_DESC_HID_MOUSE_EPNUM      7
+#endif
+
 //------------- CLASS -------------//
 #define CFG_TUD_CDC                 1
 #define CFG_TUD_MSC                 0
+#define CFG_TUD_MIDI                0
+#define CFG_TUD_CUSTOM_CLASS        0
 
 #define CFG_TUD_HID                 0
 #define CFG_TUD_HID_KEYBOARD        0
@@ -93,37 +105,25 @@
 /* Use Boot Protocol for Keyboard, Mouse. Enable this will create separated HID interface
  * require more IN endpoints. If disabled, they they are all packed into a single
  * multiple report interface called "Generic". */
-#define CFG_TUD_HID_KEYBOARD_BOOT   0
-#define CFG_TUD_HID_MOUSE_BOOT      0
-
+#define CFG_TUD_HID_KEYBOARD_BOOT   1
+#define CFG_TUD_HID_MOUSE_BOOT      1
 
 //--------------------------------------------------------------------
 // CDC
 //--------------------------------------------------------------------
 
 // FIFO size of CDC TX and RX
-#define CFG_TUD_CDC_RX_BUFSIZE      256
-#define CFG_TUD_CDC_TX_BUFSIZE      256
-
-// TX is sent automatically every Start of Frame event.
-// If not enabled, application must call tud_cdc_write_flush() periodically
-#define CFG_TUD_CDC_FLUSH_ON_SOF    0
+#define CFG_TUD_CDC_RX_BUFSIZE      64
+#define CFG_TUD_CDC_TX_BUFSIZE      64
 
 //--------------------------------------------------------------------
 // MSC
 //--------------------------------------------------------------------
-
 // Number of supported Logical Unit Number (At least 1)
 #define CFG_TUD_MSC_MAXLUN          1
 
 // Buffer size of Device Mass storage
 #define CFG_TUD_MSC_BUFSIZE         512
-
-// Number of Blocks
-#define CFG_TUD_MSC_BLOCK_NUM       16
-
-// Block size
-#define CFG_TUD_MSC_BLOCK_SZ        512
 
 // Vendor name included in Inquiry response, max 8 bytes
 #define CFG_TUD_MSC_VENDOR          "tinyusb"
@@ -145,11 +145,6 @@
  */
 #define CFG_TUD_HID_ASCII_TO_KEYCODE_LOOKUP 1
 
-//--------------------------------------------------------------------
-// USB RAM PLACEMENT
-//--------------------------------------------------------------------
-#define CFG_TUSB_ATTR_USBRAM
-#define CFG_TUSB_MEM_ALIGN          ATTR_ALIGNED(4)
 
 
 #ifdef __cplusplus

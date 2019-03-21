@@ -1,0 +1,13 @@
+pkg.name: "targets/pca10056_tinyusb"
+pkg.type: "target"
+pkg.description: 
+pkg.author: 
+pkg.homepage: 
+
+pkg.cflags: 
+    - -DCFG_TUSB_MCU=OPT_MCU_NRF5X
+    - -DARRAY_SIZE(arr)=(sizeof(arr)/sizeof((arr)[0]))
+    - -DASSERT=NRFX_ASSERT
+    - -DNRF52840_XXAA
+    - -DNRFX_POWER_CONFIG_IRQ_PRIORITY=7
+    #- -DNRFX_POWER_ENABLED=1 redefined error due to nrfx52840_config.h

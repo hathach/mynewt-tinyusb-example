@@ -1,0 +1,6 @@
+pkg.name: "targets/stm32f4disc_boot"
+pkg.type: "target"
+pkg.description: 
+pkg.author: 
+pkg.homepage: 
+
