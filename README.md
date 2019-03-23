@@ -11,11 +11,10 @@ $ newt install
 
 ### Nordic nRF52840DK PCA10056
 
-Build bootloader, create image and load it
+Build and load bootloader
 
 ```
 $ newt build pca10056_boot
-$ newt create-image pca10056_boot 0.0.0
 $ newt load pca10056_boot
 ```
 
