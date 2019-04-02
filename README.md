@@ -18,7 +18,7 @@ $ newt build pca10056_boot
 $ newt load pca10056_boot
 ```
 
-**NOTE** Tinyusb uses `nrfx_power` module to detect UBS VBUS state change. However nrfx_power is not ignored by
+**NOTE** Tinyusb uses `nrfx_power` module to detect UBS VBUS state change. However nrfx_power is ignored by
 mynewt, you will need to modify 2 places as follow:
 
 Firstly, remove nrfx_power.c from ignore list here https://github.com/apache/mynewt-core/blob/master/hw/mcu/nordic/pkg.yml#L40
