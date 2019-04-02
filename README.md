@@ -3,9 +3,11 @@ Examples of TinyUSB running on mynewt
 
 ## How to run
 
-Install dependency repos
+Clone and install dependency repos
 
 ```
+$ git clone git@github.com:hathach/mynewt-tinyusb-example.git
+$ cd mynewt-tinyusb-example
 $ newt install
 ```
 
