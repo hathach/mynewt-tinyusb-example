@@ -42,20 +42,42 @@
 #include "nrfx_power.h"
 #endif
 
-#define USBD_STACK_SIZE   128
+//--------------------------------------------------------------------+
+// MACRO CONSTANT TYPEDEF PROTYPES
+//--------------------------------------------------------------------+
+
+/* Blink pattern
+ * - 250 ms  : device not mounted
+ * - 1000 ms : device mounted
+ * - 2500 ms : device is suspended
+ */
+enum  {
+  BLINK_NOT_MOUNTED = 250,
+  BLINK_MOUNTED = 1000,
+  BLINK_SUSPENDED = 2500,
+};
+
+static uint32_t blink_interval_ms = BLINK_NOT_MOUNTED;
+
+#define USBD_STACK_SIZE   150
 static struct os_task usbd_tsk;
 static os_stack_t usbd_stack[OS_STACK_ALIGN(USBD_STACK_SIZE)];
 
-void usb_device_task(void* param);
-void virtual_com_task(void);
+#define CDC_STACK_SIZE    100
+static struct os_task cdc_tsk;
+static os_stack_t cdc_stack[OS_STACK_ALIGN(CDC_STACK_SIZE)];
 
+#define HID_STACK_SIZE    100
+static struct os_task hid_tsk;
+static os_stack_t hid_stack[OS_STACK_ALIGN(HID_STACK_SIZE)];
+
+
+void usb_device_task(void* param);
+
+//------------- main -------------//
 int main (int argc, char **argv)
 {
   int rc;
-
-#ifdef ARCH_sim
-  mcu_sim_parse_args(argc, argv);
-#endif
 
   sysinit();
 
@@ -103,23 +125,29 @@ int main (int argc, char **argv)
 
   tusb_init();
 
-  // Create a dedicated task for tinyusb device stack
-  os_task_init(&usbd_tsk, "task1", usb_device_task, NULL, OS_TASK_PRI_HIGHEST+2, OS_WAIT_FOREVER, usbd_stack, USBD_STACK_SIZE);
+  // Create a task for tinyusb device stack
+  os_task_init(&usbd_tsk, "usbd", usb_device_task, NULL, OS_TASK_PRI_HIGHEST+2, OS_WAIT_FOREVER, usbd_stack, USBD_STACK_SIZE);
+
+#if CFG_TUD_CDC
+  // Create a task for cdc
+  extern void cdc_task(void* param);
+  os_task_init(&cdc_tsk, "cdc", cdc_task, NULL, OS_TASK_PRI_HIGHEST+3, OS_WAIT_FOREVER, cdc_stack, CDC_STACK_SIZE);
+#endif
+
+#if CFG_TUD_HID
+  // Create a task for hid
+  extern void hid_task(void* params);
+  os_task_init(&hid_tsk, "hid", hid_task, NULL, OS_TASK_PRI_HIGHEST+4, OS_WAIT_FOREVER, hid_stack, HID_STACK_SIZE);
+#endif
 
   hal_gpio_init_out(LED_BLINK_PIN, 1);
+  hal_gpio_init_in(BUTTON_1, HAL_GPIO_PULL_UP);
 
   while ( 1 )
   {
-    static uint32_t blink_ms = 0;
-
-    // Toggle one per second
-    if ( os_time_ticks_to_ms32(os_time_get()) > blink_ms + 1000 )
-    {
-      blink_ms += 1000;
-      hal_gpio_toggle(LED_BLINK_PIN);
-    }
-
-    virtual_com_task();
+    // Use main task for blinking
+    os_time_delay( os_time_ms_to_ticks32(blink_interval_ms) );
+    hal_gpio_toggle(LED_BLINK_PIN);
   }
 
   assert(0);
@@ -140,40 +168,70 @@ void usb_device_task(void* param)
   }
 }
 
+//--------------------------------------------------------------------+
+// Device callbacks
+//--------------------------------------------------------------------+
+
 // Invoked when device is mounted
 void tud_mount_cb(void)
 {
+  blink_interval_ms = BLINK_MOUNTED;
 }
 
 // Invoked when device is unmounted
 void tud_umount_cb(void)
 {
+  blink_interval_ms = BLINK_NOT_MOUNTED;
 }
 
-//------------- CDC -------------//
-
-// Simply echo data back to host
-void virtual_com_task(void)
+// Invoked when usb bus is suspended
+// remote_wakeup_en : if host allow us  to perform remote wakeup
+// Within 7ms, device must draw an average of current less than 2.5 mA from bus
+void tud_suspend_cb(bool remote_wakeup_en)
 {
-  if ( tud_cdc_connected() )
+  (void) remote_wakeup_en;
+  blink_interval_ms = BLINK_SUSPENDED;
+}
+
+// Invoked when usb bus is resumed
+void tud_resume_cb(void)
+{
+  blink_interval_ms = BLINK_MOUNTED;
+}
+//--------------------------------------------------------------------+
+// USB CDC
+//--------------------------------------------------------------------+
+#if CFG_TUD_CDC
+void cdc_task(void* params)
+{
+  (void) params;
+
+  // RTOS forever loop
+  while ( 1 )
   {
-    // connected and there are data available
-    if ( tud_cdc_available() )
+    if ( tud_cdc_connected() )
     {
-      uint8_t buf[64];
-
-      // read and echo back
-      uint32_t count = tud_cdc_read(buf, sizeof(buf));
-
-      for(uint32_t i=0; i<count; i++)
+      // connected and there are data available
+      if ( tud_cdc_available() )
       {
-        tud_cdc_write_char(buf[i]);
+        uint8_t buf[64];
 
-        if ( buf[i] == '\r' ) tud_cdc_write_char('\n');
+        // read and echo back
+        uint32_t count = tud_cdc_read(buf, sizeof(buf));
+
+        for(uint32_t i=0; i<count; i++)
+        {
+          tud_cdc_write_char(buf[i]);
+
+          if ( buf[i] == '\r' ) tud_cdc_write_char('\n');
+        }
+
+        tud_cdc_write_flush();
       }
-
-      tud_cdc_write_flush();
     }
+
+    // delay to yield
+    os_time_delay(1);
   }
 }
 
@@ -186,7 +244,7 @@ void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts)
   if ( dtr && rts )
   {
     // print initial message when connected
-    tud_cdc_write_str("\r\nTinyUSB CDC MSC HID device example\r\n");
+    tud_cdc_write_str("\r\nTinyUSB CDC MSC HID device with MyNewt example\r\n");
   }
 }
 
@@ -195,3 +253,96 @@ void tud_cdc_rx_cb(uint8_t itf)
 {
   (void) itf;
 }
+
+#endif
+
+//--------------------------------------------------------------------+
+// USB HID
+//--------------------------------------------------------------------+
+#if CFG_TUD_HID
+
+// Must match with ID declared by HID Report Descriptor, better to be in header file
+enum
+{
+  REPORT_ID_KEYBOARD = 1,
+  REPORT_ID_MOUSE
+};
+
+void hid_task(void* params)
+{
+  (void) params;
+
+  while (1)
+  {
+    // Poll every 10ms
+    os_time_delay( os_time_ms_to_ticks32(10) );
+
+    // button is active low
+    int const btn = 1 - hal_gpio_read(BUTTON_1);
+
+    // Remote wakeup
+    if ( tud_suspended() && btn )
+    {
+      // Wake up host if we are in suspend mode
+      // and REMOTE_WAKEUP feature is enabled by host
+      tud_remote_wakeup();
+    }
+
+    /*------------- Mouse -------------*/
+    if ( tud_hid_ready() )
+    {
+      if ( btn )
+      {
+        int8_t const delta = 5;
+        tud_hid_mouse_move(REPORT_ID_MOUSE, delta, delta); // right + down
+
+        // delay a bit before attempt to send keyboard report
+        os_time_delay( os_time_ms_to_ticks32(2) );
+      }
+    }
+
+    /*------------- Keyboard -------------*/
+    if ( tud_hid_ready() )
+    {
+      // use to avoid send multiple consecutive zero report for keyboard
+      static bool has_key = false;
+
+      if ( btn )
+      {
+        uint8_t keycode[6] = { 0 };
+        keycode[0] = HID_KEY_A;
+
+        tud_hid_keyboard_report(REPORT_ID_KEYBOARD, 0, keycode);
+
+        has_key = true;
+      }else
+      {
+        // send empty key report if previously has key pressed
+        if (has_key) tud_hid_keyboard_key_release(REPORT_ID_KEYBOARD);
+        has_key = false;
+      }
+    }
+  }
+}
+
+uint16_t tud_hid_get_report_cb(uint8_t report_id, hid_report_type_t report_type, uint8_t* buffer, uint16_t reqlen)
+{
+  // TODO not Implemented
+  (void) report_id;
+  (void) report_type;
+  (void) buffer;
+  (void) reqlen;
+
+  return 0;
+}
+
+void tud_hid_set_report_cb(uint8_t report_id, hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize)
+{
+  // TODO not Implemented
+  (void) report_id;
+  (void) report_type;
+  (void) buffer;
+  (void) bufsize;
+}
+
+#endif
