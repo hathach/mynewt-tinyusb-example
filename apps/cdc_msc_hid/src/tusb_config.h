@@ -77,20 +77,13 @@
 #define CFG_TUD_MIDI                0
 #define CFG_TUD_CUSTOM_CLASS        0
 
-//--------------------------------------------------------------------
-// CDC
-//--------------------------------------------------------------------
+//------------- CDC -------------//
 
 // FIFO size of CDC TX and RX
 #define CFG_TUD_CDC_RX_BUFSIZE      64
 #define CFG_TUD_CDC_TX_BUFSIZE      64
 
-//--------------------------------------------------------------------
-// MSC
-//--------------------------------------------------------------------
-
-// Number of supported Logical Unit Number (At least 1)
-#define CFG_TUD_MSC_MAXLUN          1
+//------------- MSC -------------//
 
 // Buffer size of Device Mass storage
 #define CFG_TUD_MSC_BUFSIZE         512
@@ -104,15 +97,10 @@
 // Product revision string included in Inquiry response, max 4 bytes
 #define CFG_TUD_MSC_PRODUCT_REV     "1.0"
 
-//--------------------------------------------------------------------
-// HID
-//--------------------------------------------------------------------
+//------------- HID -------------//
 
-/* Use the HID_ASCII_TO_KEYCODE lookup
- * This will occupies 256 bytes of ROM. It will also enable the use of extra APIs
- * - tud_hid_keyboard_send_char()
- */
-#define CFG_TUD_HID_ASCII_TO_KEYCODE_LOOKUP 0
+// Should be sufficient to hold ID (if any) + Data
+#define CFG_TUD_HID_BUFSIZE         16
 
 #ifdef __cplusplus
  }
