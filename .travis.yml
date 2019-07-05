@@ -9,7 +9,6 @@ addons:
       - sourceline: "ppa:team-gcc-arm-embedded/ppa"
     packages:
       - python3
-      - ruby
       - gcc-arm-embedded
 
 install:
@@ -19,5 +18,8 @@ install:
   - sudo apt-get update
   - sudo apt install newt
 
+before_script:
+  - newt install
+
 script:
-  - echo test travis
+  - newt build pca10056_tinyusb
