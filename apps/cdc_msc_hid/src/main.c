@@ -327,7 +327,6 @@ void usb_hardware_init(void)
   // Setup Power IRQ to detect USB VBUS state ( detected, ready, removed)
   NVIC_SetVector(POWER_CLOCK_IRQn, (uint32_t) POWER_CLOCK_IRQHandler);
   NVIC_SetPriority(POWER_CLOCK_IRQn, 7);
-  DETECTED
   nrf_power_int_enable(
         NRF_POWER_INT_USBDETECTED_MASK |
         NRF_POWER_INT_USBREMOVED_MASK  |
