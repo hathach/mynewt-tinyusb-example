@@ -14,7 +14,8 @@ addons:
 
 install:
   - wget -qO - https://raw.githubusercontent.com/JuulLabs-OSS/debian-mynewt/master/mynewt.gpg.key | sudo apt-key add -
-  - sudo echo "deb https://raw.githubusercontent.com/JuulLabs-OSS/debian-mynewt/master latest main" > /etc/apt/sources.list.d/mynewt.list
+  - echo "deb https://raw.githubusercontent.com/JuulLabs-OSS/debian-mynewt/master latest main" > mynewt.list
+  - sudo mv mynewt.list /etc/apt/sources.list.d/
   - sudo apt-get update
   - sudo apt install newt
 
