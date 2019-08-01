@@ -22,4 +22,5 @@ before_script:
   - newt install
 
 script:
-  - newt build pca10056_tinyusb
+  - newt build pca10056_cdc_msc_hid
+  - newt build pca10056_msc_dual_lun
