@@ -1,0 +1,3 @@
+target.app: "apps/msc_dual_lun"
+target.bsp: "@apache-mynewt-core/hw/bsp/nordic_pca10056"
+target.build_profile: "debug"

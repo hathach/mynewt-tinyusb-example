@@ -1,0 +1,17 @@
+pkg.name: apps/msc_dual_lun
+pkg.type: app
+pkg.description: Tinyusb example.
+pkg.author: "Ha Thach <thach@tinyusb.org>"
+pkg.homepage: "https://github.com/hathach/tinyusb"
+pkg.keywords:
+    - usb
+
+pkg.deps:
+    - "@apache-mynewt-core/kernel/os"
+    - "@apache-mynewt-core/hw/hal"
+    - "@apache-mynewt-core/sys/console/stub"
+    - "@apache-mynewt-core/sys/log/stub"
+    - "@tinyusb/tinyusb"
+
+pkg.cflags: 
+    - "-I@tinyusb/src"
