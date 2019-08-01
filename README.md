@@ -2,7 +2,7 @@
 
 Due to the newt package build system, mynewt examples are better to be a spin-off from the [main stack repo](https://github.com/hathach/tinyusb). To run the examples
 
-- Firstly check out the [official mynewt documentation](official mynewt documentation ) to set up and install newt tool
+- Firstly check out the [official mynewt documentation](https://mynewt.apache.org/documentation/) to set up and install newt tool
 - Clone and install dependency repos
 
 ```
