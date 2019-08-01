@@ -32,9 +32,12 @@
  *   [MSB]         HID | MSC | CDC          [LSB]
  */
 #define _PID_MAP(itf, n)  ( (CFG_TUD_##itf) << (n) )
-#define USB_PID           (0x4000 | _PID_MAP(CDC, 0) | _PID_MAP(MSC, 1) | _PID_MAP(HID, 2) )
+#define USB_PID           (0x4000 | _PID_MAP(CDC, 0) | _PID_MAP(MSC, 1) | _PID_MAP(HID, 2) | \
+                           _PID_MAP(MIDI, 3) | _PID_MAP(VENDOR, 4) )
 
-//------------- Device Descriptors -------------//
+//--------------------------------------------------------------------+
+// Device Descriptors
+//--------------------------------------------------------------------+
 tusb_desc_device_t const desc_device =
 {
     .bLength            = sizeof(tusb_desc_device_t),
@@ -66,7 +69,16 @@ tusb_desc_device_t const desc_device =
     .bNumConfigurations = 0x01
 };
 
-//------------- HID Report Descriptor -------------//
+// Invoked when received GET DEVICE DESCRIPTOR
+// Application return pointer to descriptor
+uint8_t const * tud_descriptor_device_cb(void)
+{
+  return (uint8_t const *) &desc_device;
+}
+
+//--------------------------------------------------------------------+
+// HID Report Descriptor
+//--------------------------------------------------------------------+
 #if CFG_TUD_HID
 enum
 {
@@ -90,29 +102,29 @@ uint8_t const * tud_hid_descriptor_report_cb(void)
 
 #endif
 
-//------------- Configuration Descriptor -------------//
-enum
-{
-  #if CFG_TUD_CDC
-    ITF_NUM_CDC = 0,
-    ITF_NUM_CDC_DATA,
-  #endif
-
-  #if CFG_TUD_MSC
-    ITF_NUM_MSC,
-  #endif
-
-  #if CFG_TUD_HID
-    ITF_NUM_HID,
-  #endif
-
-    ITF_NUM_TOTAL
-};
+//--------------------------------------------------------------------+
+// Configuration Descriptor
+//--------------------------------------------------------------------+
 
 enum
 {
-  CONFIG_TOTAL_LEN = TUD_CONFIG_DESC_LEN + CFG_TUD_CDC*TUD_CDC_DESC_LEN + CFG_TUD_MSC*TUD_MSC_DESC_LEN + CFG_TUD_HID*TUD_HID_DESC_LEN
+#if CFG_TUD_CDC
+  ITF_NUM_CDC = 0,
+  ITF_NUM_CDC_DATA,
+#endif
+
+#if CFG_TUD_MSC
+  ITF_NUM_MSC,
+#endif
+
+#if CFG_TUD_HID
+  ITF_NUM_HID,
+#endif
+
+  ITF_NUM_TOTAL
 };
+
+#define CONFIG_TOTAL_LEN    (TUD_CONFIG_DESC_LEN + CFG_TUD_CDC*TUD_CDC_DESC_LEN + CFG_TUD_MSC*TUD_MSC_DESC_LEN + CFG_TUD_HID*TUD_HID_DESC_LEN)
 
 #if CFG_TUSB_MCU == OPT_MCU_LPC175X_6X || CFG_TUSB_MCU == OPT_MCU_LPC177X_8X || CFG_TUSB_MCU == OPT_MCU_LPC40XX
   // LPC 17xx and 40xx endpoint type (bulk/interrupt/iso) are fixed by its number
@@ -136,7 +148,7 @@ uint8_t const desc_configuration[] =
 
 #if CFG_TUD_MSC
   // Interface number, string index, EP Out & EP In address, EP size
-  TUD_MSC_DESCRIPTOR(ITF_NUM_MSC, 5, EPNUM_MSC, 0x80 | EPNUM_MSC, 64), // highspeed 512
+  TUD_MSC_DESCRIPTOR(ITF_NUM_MSC, 5, EPNUM_MSC, 0x80 | EPNUM_MSC, (CFG_TUSB_RHPORT0_MODE & OPT_MODE_HIGH_SPEED) ? 512 : 64),
 #endif
 
 #if CFG_TUD_HID
@@ -145,22 +157,19 @@ uint8_t const desc_configuration[] =
 #endif
 };
 
-// Invoked when received GET DEVICE DESCRIPTOR
-// Application return pointer to descriptor
-uint8_t const * tud_descriptor_device_cb(void)
-{
-  return (uint8_t const *) &desc_device;
-}
 
 // Invoked when received GET CONFIGURATION DESCRIPTOR
-// Application return pointer to descriptor, whose contents must exist long enough for transfer to complete
+// Application return pointer to descriptor
+// Descriptor contents must exist long enough for transfer to complete
 uint8_t const * tud_descriptor_configuration_cb(uint8_t index)
 {
-  (void) index; // for multiple configuration
+  (void) index; // for multiple configurations
   return desc_configuration;
 }
 
-//------------- String Descriptors -------------//
+//--------------------------------------------------------------------+
+// String Descriptors
+//--------------------------------------------------------------------+
 
 // array of pointer to string descriptors
 char const* string_desc_arr [] =
@@ -188,6 +197,8 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index)
     chr_count = 1;
   }else
   {
+    // Convert ASCII string into UTF-16
+
     if ( !(index < sizeof(string_desc_arr)/sizeof(string_desc_arr[0])) ) return NULL;
 
     const char* str = string_desc_arr[index];
@@ -202,8 +213,8 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index)
     }
   }
 
-  // first byte is len, second byte is string type
-  _desc_str[0] = TUD_DESC_STR_HEADER(chr_count);
+  // first byte is length (including header), second byte is string type
+  _desc_str[0] = (TUSB_DESC_STRING << 8 ) | (2*chr_count + 2);
 
   return _desc_str;
 }
