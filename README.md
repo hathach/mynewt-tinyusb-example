@@ -45,7 +45,7 @@ This example enumerated as mass storage with dual ram disk
 
 ```
 $ newt build pca10056_msc_dual_lun
-$ newt create-image pca10056_cmsc_dual_lun 1.0.0
+$ newt create-image pca10056_msc_dual_lun 1.0.0
 $ newt load pca10056_msc_dual_lun
 ```
 
