@@ -1,8 +1,8 @@
 # mynewt-tinyusb-example
 
-Due to the newt package build system, mynewt examples are better to be a spin-off from the [main stack repo](https://github.com/hathach/tinyusb). To run the examples
+Due to the newt package build system, Mynewt examples are better to be a spin-off from the [main stack repo](https://github.com/hathach/tinyusb). To run the examples
 
-- Firstly check out the [official mynewt documentation](https://mynewt.apache.org/documentation/) to set up and install newt tool
+- Firstly check out the [official Mynewt documentation](https://mynewt.apache.org/documentation/) to set up and install newt tool
 - Clone and install dependency repos
 
 ```
@@ -13,7 +13,7 @@ $ newt install
 
 ## Supported Boards
 
-Examples should be able to run with boards that are supported by mynewt, provided that the mcu is already supported by TinyUSB stack. Following is board that is mainly used and tested
+Examples should be able to run with boards that are supported by Mynewt, provided that the mcu is already supported by TinyUSB stack. Following is board that is mainly used and tested
 
 - [Nordic nRF52840 Development Kit (aka pca10056)](https://www.nordicsemi.com/Software-and-Tools/Development-Kits/nRF52840-DK)
 - [STM32F407g Discovery](https://www.st.com/en/evaluation-tools/stm32f4discovery.html) Note: work in progress, not able to blink LED just yet.
