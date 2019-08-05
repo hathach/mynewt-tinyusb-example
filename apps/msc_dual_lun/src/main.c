@@ -34,7 +34,6 @@
 
 #ifdef NRF52840_XXAA
 #include "nrf_power.h"
-#include "nrfx_power.h" // for NRFX_POWER_USB_EVT_DETECTED/USBREADY/USBREMOVED enum
 #endif
 
 //--------------------------------------------------------------------+
@@ -150,7 +149,15 @@ void tud_resume_cb(void)
 //--------------------------------------------------------------------+
 #ifdef NRF52840_XXAA
 
-// tinyusb function that handles power event (detected, ready, removed)
+// same value as NRFX_POWER_USB_EVT_* in nrfx_power
+enum
+{
+  USB_EVT_DETECTED = 0,
+  USB_EVT_REMOVED = 1,
+  USB_EVT_READY = 2
+};
+
+// tinyusb function that handles power event (0: detected, 1: remove, 2: ready)
 // We must call it within SD's SOC event handler, or set it as power event handler if SD is not enabled.
 extern void tusb_hal_nrf_power_event(uint32_t event);
 
@@ -179,12 +186,12 @@ void usb_hardware_init(void)
 
   if ( usb_reg & POWER_USBREGSTATUS_VBUSDETECT_Msk )
   {
-    tusb_hal_nrf_power_event(NRFX_POWER_USB_EVT_DETECTED);
+    tusb_hal_nrf_power_event(USB_EVT_DETECTED);
   }
 
   if ( usb_reg & POWER_USBREGSTATUS_OUTPUTRDY_Msk )
   {
-    tusb_hal_nrf_power_event(NRFX_POWER_USB_EVT_READY);
+    tusb_hal_nrf_power_event(USB_EVT_READY);
   }
 }
 
@@ -196,19 +203,19 @@ void POWER_CLOCK_IRQHandler(void)
   if ((0 != (enabled & NRF_POWER_INT_USBDETECTED_MASK)) &&
       nrf_power_event_get_and_clear(NRF_POWER_EVENT_USBDETECTED))
   {
-    tusb_hal_nrf_power_event(NRFX_POWER_USB_EVT_DETECTED);
+    tusb_hal_nrf_power_event(USB_EVT_DETECTED);
   }
 
   if ((0 != (enabled & NRF_POWER_INT_USBREMOVED_MASK)) &&
       nrf_power_event_get_and_clear(NRF_POWER_EVENT_USBREMOVED))
   {
-    tusb_hal_nrf_power_event(NRFX_POWER_USB_EVT_REMOVED);
+    tusb_hal_nrf_power_event(USB_EVT_REMOVED);
   }
 
   if ((0 != (enabled & NRF_POWER_INT_USBPWRRDY_MASK)) &&
       nrf_power_event_get_and_clear(NRF_POWER_EVENT_USBPWRRDY))
   {
-    tusb_hal_nrf_power_event(NRFX_POWER_USB_EVT_READY);
+    tusb_hal_nrf_power_event(USB_EVT_READY);
   }
 }
 
