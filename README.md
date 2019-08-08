@@ -1,5 +1,7 @@
 # mynewt-tinyusb-example
 
+![tinyUSB_240x100](https://user-images.githubusercontent.com/249515/62646655-f9393200-b978-11e9-9c53-484862f15503.png)
+
 [![Build Status](https://travis-ci.com/hathach/mynewt-tinyusb-example.svg?branch=master)](https://travis-ci.com/hathach/mynewt-tinyusb-example) [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 
 Due to the newt package build system, Mynewt examples are better to be a spin-off from the [main stack repo](https://github.com/hathach/tinyusb). To run the examples
