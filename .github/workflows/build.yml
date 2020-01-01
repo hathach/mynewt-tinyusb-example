@@ -1,0 +1,42 @@
+name: Build
+
+on: [pull_request, push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example: ['pca10056']
+    steps:
+    - name: Setup Python
+      uses: actions/setup-python@v1
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v1.1.0
+      
+    - name: Install Toolchains
+      run: |
+        # Install ARM GCC
+        npm install --global xpm
+        xpm install --global @xpack-dev-tools/arm-none-eabi-gcc@latest
+        echo "::add-path::`echo $HOME/opt/xPacks/@xpack-dev-tools/arm-none-eabi-gcc/*/.content/bin`"
+        # Install Newt
+        wget -qO - https://raw.githubusercontent.com/JuulLabs-OSS/debian-mynewt/master/mynewt.gpg.key | sudo apt-key add -
+        echo "deb https://raw.githubusercontent.com/JuulLabs-OSS/debian-mynewt/master latest main" > mynewt.list
+        sudo mv mynewt.list /etc/apt/sources.list.d/
+        sudo apt-get update
+        sudo apt install newt
+        newt version
+      
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Run newt install
+      run: newt install
+        
+    - name: Build
+      run: |
+        newt build ${{ matrix.example }}_cdc_msc_hid
+        newt build ${{ matrix.example }}_msc_dual_lun
