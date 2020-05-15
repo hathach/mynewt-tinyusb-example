@@ -73,18 +73,6 @@ int main (int argc, char **argv)
   // Create a task for tinyusb device stack
   os_task_init(&usbd_tsk, "usbd", usb_device_task, NULL, OS_TASK_PRI_HIGHEST+2, OS_WAIT_FOREVER, usbd_stack, USBD_STACK_SIZE);
 
-#if CFG_TUD_CDC
-  // Create a task for cdc
-  extern void cdc_task(void* param);
-  os_task_init(&cdc_tsk, "cdc", cdc_task, NULL, OS_TASK_PRI_HIGHEST+3, OS_WAIT_FOREVER, cdc_stack, CDC_STACK_SIZE);
-#endif
-
-#if CFG_TUD_HID
-  // Create a task for hid
-  extern void hid_task(void* params);
-  os_task_init(&hid_tsk, "hid", hid_task, NULL, OS_TASK_PRI_HIGHEST+4, OS_WAIT_FOREVER, hid_stack, HID_STACK_SIZE);
-#endif
-
   hal_gpio_init_out(LED_BLINK_PIN, 1);
   hal_gpio_init_in(BUTTON_1, HAL_GPIO_PULL_UP);
 
@@ -149,6 +137,8 @@ void tud_resume_cb(void)
 //--------------------------------------------------------------------+
 #ifdef NRF52840_XXAA
 
+#include "nrf_power.h"
+
 // same value as NRFX_POWER_USB_EVT_* in nrfx_power
 enum
 {
@@ -161,9 +151,36 @@ enum
 // We must call it within SD's SOC event handler, or set it as power event handler if SD is not enabled.
 extern void tusb_hal_nrf_power_event(uint32_t event);
 
-extern void USBD_IRQHandler(void);
-extern void POWER_CLOCK_IRQHandler(void);
+// Power ISR to detect USB VBUS state
+void POWER_CLOCK_IRQHandler(void)
+{
+  uint32_t enabled = nrf_power_int_enable_get(NRF_POWER);
 
+  if ((0 != (enabled & NRF_POWER_INT_USBDETECTED_MASK)) &&
+      nrf_power_event_get_and_clear(NRF_POWER, NRF_POWER_EVENT_USBDETECTED))
+  {
+    tusb_hal_nrf_power_event(USB_EVT_DETECTED);
+  }
+
+  if ((0 != (enabled & NRF_POWER_INT_USBREMOVED_MASK)) &&
+      nrf_power_event_get_and_clear(NRF_POWER, NRF_POWER_EVENT_USBREMOVED))
+  {
+    tusb_hal_nrf_power_event(USB_EVT_REMOVED);
+  }
+
+  if ((0 != (enabled & NRF_POWER_INT_USBPWRRDY_MASK)) &&
+      nrf_power_event_get_and_clear(NRF_POWER, NRF_POWER_EVENT_USBPWRRDY))
+  {
+    tusb_hal_nrf_power_event(USB_EVT_READY);
+  }
+}
+
+void USBD_IRQHandler(void)
+{
+  tud_int_handler(0);
+}
+
+// Initialize USB hardware
 void usb_hardware_init(void)
 {
   // Setup USB IRQ
@@ -173,7 +190,7 @@ void usb_hardware_init(void)
   // Setup Power IRQ to detect USB VBUS state ( detected, ready, removed)
   NVIC_SetVector(POWER_CLOCK_IRQn, (uint32_t) POWER_CLOCK_IRQHandler);
   NVIC_SetPriority(POWER_CLOCK_IRQn, 7);
-  nrf_power_int_enable(
+  nrf_power_int_enable(NRF_POWER,
         NRF_POWER_INT_USBDETECTED_MASK |
         NRF_POWER_INT_USBREMOVED_MASK  |
         NRF_POWER_INT_USBPWRRDY_MASK);
@@ -194,29 +211,4 @@ void usb_hardware_init(void)
     tusb_hal_nrf_power_event(USB_EVT_READY);
   }
 }
-
-// Power ISR to detect USB VBUS state
-void POWER_CLOCK_IRQHandler(void)
-{
-  uint32_t enabled = nrf_power_int_enable_get();
-
-  if ((0 != (enabled & NRF_POWER_INT_USBDETECTED_MASK)) &&
-      nrf_power_event_get_and_clear(NRF_POWER_EVENT_USBDETECTED))
-  {
-    tusb_hal_nrf_power_event(USB_EVT_DETECTED);
-  }
-
-  if ((0 != (enabled & NRF_POWER_INT_USBREMOVED_MASK)) &&
-      nrf_power_event_get_and_clear(NRF_POWER_EVENT_USBREMOVED))
-  {
-    tusb_hal_nrf_power_event(USB_EVT_REMOVED);
-  }
-
-  if ((0 != (enabled & NRF_POWER_INT_USBPWRRDY_MASK)) &&
-      nrf_power_event_get_and_clear(NRF_POWER_EVENT_USBPWRRDY))
-  {
-    tusb_hal_nrf_power_event(USB_EVT_READY);
-  }
-}
-
 #endif

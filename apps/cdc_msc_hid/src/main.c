@@ -32,10 +32,6 @@
 #include "hal/hal_gpio.h"
 #include "tusb.h"
 
-#ifdef NRF52840_XXAA
-#include "nrf_power.h"
-#endif
-
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF PROTYPES
 //--------------------------------------------------------------------+
@@ -305,6 +301,8 @@ void tud_hid_set_report_cb(uint8_t report_id, hid_report_type_t report_type, uin
 // NRF52840 power management
 //--------------------------------------------------------------------+
 #ifdef NRF52840_XXAA
+
+#include "nrf_power.h"
 
 // same value as NRFX_POWER_USB_EVT_* in nrfx_power
 enum
