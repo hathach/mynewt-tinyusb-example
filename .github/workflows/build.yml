@@ -41,11 +41,9 @@ jobs:
       
     - name: Checkout code
       uses: actions/checkout@v2
-      
-    - name: Run newt install
-      run: newt install
-        
+              
     - name: Build
       run: |
+        newt upgrade
         newt build ${{ matrix.example }}_cdc_msc_hid
         newt build ${{ matrix.example }}_msc_dual_lun
