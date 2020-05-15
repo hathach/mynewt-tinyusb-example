@@ -37,7 +37,7 @@ jobs:
         MYNEWT_FNAME=apache-mynewt-newt-bin-linux-$MYNEWT_VERSION        
         wget https://downloads.apache.org/mynewt/apache-mynewt-$MYNEWT_VERSION/$MYNEWT_FNAME.tgz
         tar -C $HOME -xaf $MYNEWT_FNAME.tgz
-        echo "::add-path::`echo $HOME/apache-mynewt-newt-bin-*/`"
+        echo "::add-path::`echo $HOME/apache-mynewt-newt-bin-*`"
       
     - name: Checkout code
       uses: actions/checkout@v2
