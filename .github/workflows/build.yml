@@ -12,9 +12,14 @@ jobs:
     steps:
     - name: Setup Python
       uses: actions/setup-python@v1
+      run: python --version
 
     - name: Setup Node.js
       uses: actions/setup-node@v1.1.0
+      
+    - name: Setup Go
+      uses: actions/setup-go@v2
+      run: go version
       
     - name: Install Toolchains
       env:
@@ -34,10 +39,15 @@ jobs:
         #newt version
         
         # Install Newt
-        MYNEWT_FNAME=apache-mynewt-newt-bin-linux-$MYNEWT_VERSION        
-        wget https://downloads.apache.org/mynewt/apache-mynewt-$MYNEWT_VERSION/$MYNEWT_FNAME.tgz
-        tar -C $HOME -xaf $MYNEWT_FNAME.tgz
-        echo "::add-path::`echo $HOME/apache-mynewt-newt-bin-*`"
+        #MYNEWT_FNAME=apache-mynewt-newt-bin-linux-$MYNEWT_VERSION
+        #wget https://downloads.apache.org/mynewt/apache-mynewt-$MYNEWT_VERSION/$MYNEWT_FNAME.tgz
+        #tar -C $HOME -xaf $MYNEWT_FNAME.tgz
+        #echo "::add-path::`echo $HOME/apache-mynewt-newt-bin-*`"
+        
+        # Install newt from github master
+        git clone --depth 1 git@github.com:apache/mynewt-newt.git
+        mynewt-newt/build.sh
+        mv mynewt-newt/newt/newt $HOME/bin
       
     - name: Checkout code
       uses: actions/checkout@v2
