@@ -47,3 +47,4 @@ jobs:
         newt upgrade
         newt build ${{ matrix.example }}-cdc_msc
         newt build ${{ matrix.example }}-msc_dual_lun
+        newt build ${{ matrix.example }}-blehci
