@@ -1,4 +1,4 @@
-pkg.name: "targets/pca10056_cdc_msc_hid"
+pkg.name: "targets/pca10056_cdc_msc"
 pkg.type: "target"
 pkg.description: 
 pkg.author: 
