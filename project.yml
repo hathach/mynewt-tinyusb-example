@@ -17,10 +17,11 @@
 # under the License.
 #
 
-project.name: "my_project"
+project.name: "tinyusb_example"
 
 project.repositories:
     - apache-mynewt-core
+    - apache-mynewt-nimble
     - tinyusb
 
 # Use github's distribution mechanism for core ASF libraries.
@@ -28,10 +29,16 @@ project.repositories:
 #
 repository.apache-mynewt-core:
     type: github
-    vers: 1-latest
+    vers: 0.0.0
     user: apache
     repo: mynewt-core
 
+repository.apache-mynewt-nimble:
+    type: github
+    vers: 0.0.0
+    user: apache
+    repo: mynewt-nimble
+    
 repository.tinyusb:
     type: github
     vers: 0.0.0

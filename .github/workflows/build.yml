@@ -45,5 +45,5 @@ jobs:
     - name: Build
       run: |
         newt upgrade
-        newt build ${{ matrix.example }}_cdc_msc_hid
-        newt build ${{ matrix.example }}_msc_dual_lun
+        newt build ${{ matrix.example }}-cdc_msc
+        newt build ${{ matrix.example }}-msc_dual_lun

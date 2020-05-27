@@ -1,3 +1,0 @@
-target.app: "apps/cdc_msc_hid"
-target.bsp: "@apache-mynewt-core/hw/bsp/stm32f4discovery"
-target.build_profile: "debug"
