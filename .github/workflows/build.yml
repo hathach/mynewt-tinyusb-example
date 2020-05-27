@@ -55,11 +55,10 @@ jobs:
       run: |
         mynewt-newt/build.sh
         echo "::add-path::$GITHUB_WORKSPACE/mynewt-newt/newt"
-        newt version
+        mynewt-newt/newt/newt version
 
     - name: Build
       run: |
-        newt version
         newt upgrade
         newt build ${{ matrix.example }}-cdc_msc
         newt build ${{ matrix.example }}-msc_dual_lun
