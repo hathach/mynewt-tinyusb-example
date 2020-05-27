@@ -41,17 +41,25 @@ jobs:
         #wget https://downloads.apache.org/mynewt/apache-mynewt-$MYNEWT_VERSION/$MYNEWT_FNAME.tgz
         #tar -C $HOME -xaf $MYNEWT_FNAME.tgz
         #echo "::add-path::`echo $HOME/apache-mynewt-newt-bin-*`"
-        
-        # Install newt from github master
-        git clone --depth 1 git@github.com:apache/mynewt-newt.git
-        mynewt-newt/build.sh
-        mv mynewt-newt/newt/newt $HOME/bin
-      
+              
     - name: Checkout code
       uses: actions/checkout@v2
-              
+
+    - name: Checkout mynewt-newt
+      uses: actions/checkout@v2
+      with:
+         repository: apache/mynewt-newt
+         path: mynewt-newt
+
+    - name: Install newt
+      run: |
+        mynewt-newt/build.sh
+        echo "::add-path::$GITHUB_WORKSPACE/mynewt-newt/newt"
+        newt version
+
     - name: Build
       run: |
+        newt version
         newt upgrade
         newt build ${{ matrix.example }}-cdc_msc
         newt build ${{ matrix.example }}-msc_dual_lun
