@@ -26,8 +26,8 @@ Examples should be able to run with boards that are supported by Mynewt, provide
 Build and load bootloader
 
 ```
-$ newt build pca10056_boot
-$ newt load pca10056_boot
+$ newt build pca10056-boot
+$ newt load pca10056-boot
 ```
 
 Now we can build tinyusb example, create image and load it
@@ -37,9 +37,9 @@ Now we can build tinyusb example, create image and load it
 This example enumerated as composite device with CDC, MSC and HID
 
 ```
-$ newt build pca10056_cdc_msc
-$ newt create-image pca10056_cdc_msc 1.0
-$ newt load pca10056_cdc_msc
+$ newt build pca10056-cdc_msc
+$ newt create-image pca10056-cdc_msc 1.0
+$ newt load pca10056-cdc_msc
 ```
 
 #### MSC dual Logical Unit
@@ -47,7 +47,7 @@ $ newt load pca10056_cdc_msc
 This example enumerated as mass storage with dual ram disk
 
 ```
-$ newt build pca10056_msc_dual_lun
-$ newt create-image pca10056_msc_dual_lun 1.0
-$ newt load pca10056_msc_dual_lun
+$ newt build pca10056-msc_dual_lun
+$ newt create-image pca10056-msc_dual_lun 1.0
+$ newt load pca10056-msc_dual_lun
 ```

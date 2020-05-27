@@ -1,4 +1,4 @@
-pkg.name: "targets/pca10056_cdc_msc"
+pkg.name: "targets/pca10056-msc_dual_lun"
 pkg.type: "target"
 pkg.description: 
 pkg.author: 
