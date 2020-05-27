@@ -12,7 +12,7 @@ Due to the newt package build system, Mynewt examples are better to be a spin-of
 ```
 $ git clone https://github.com/hathach/mynewt-tinyusb-example.git
 $ cd mynewt-tinyusb-example
-$ newt install
+$ newt upgrade
 ```
 
 ## Supported Boards
@@ -21,20 +21,23 @@ Examples should be able to run with boards that are supported by Mynewt, provide
 
 - [Nordic nRF52840 Development Kit (aka pca10056)](https://www.nordicsemi.com/Software-and-Tools/Development-Kits/nRF52840-DK)
 
-### Nordic nRF52840DK PCA10056
 
-Build and load bootloader
+## Examples
+
+There are several ready-to-build target examples, following is build instructions
+
+### Bootloader
+
+Each board needs to have an bootloader if not previously loaded. This only needs to do once.
 
 ```
 $ newt build pca10056-boot
 $ newt load pca10056-boot
 ```
 
-Now we can build tinyusb example, create image and load it
+#### CDC MSC Composite
 
-#### CDC MSC HID composite example
-
-This example enumerated as composite device with CDC, MSC and HID
+This example enumerated as composite device with CDC, MSC
 
 ```
 $ newt build pca10056-cdc_msc
@@ -42,7 +45,7 @@ $ newt create-image pca10056-cdc_msc 1.0
 $ newt load pca10056-cdc_msc
 ```
 
-#### MSC dual Logical Unit
+#### MSC Dual Logical Unit
 
 This example enumerated as mass storage with dual ram disk
 
@@ -50,4 +53,41 @@ This example enumerated as mass storage with dual ram disk
 $ newt build pca10056-msc_dual_lun
 $ newt create-image pca10056-msc_dual_lun 1.0
 $ newt load pca10056-msc_dual_lun
+```
+
+### Bluetooth HCI Driver
+
+This example enumerated as Bluetooth controller and allow Host OS to use it to perform scanning, connecting etc ...
+
+```
+$ newt build pca10056-blehci
+$ newt create-image pca10056-blehci 1.0
+$ newt load pca10056-blehci
+```
+
+Here are some Linux command to use:
+Show available controllers (NimBLE should show up along with preexisting ones)
+
+```shell script
+hciconfig
+```
+
+To scan device around command line tool can be used
+
+```
+bluetoothctl
+
+[bluetooth]# list
+[bluetooth]# select CC:BB:10:10:20:20
+[bluetooth]# scan on
+[bluetooth]# scan off
+[bluetooth]# devices
+[bluetooth]# connect <some address from devices>
+
+```
+
+To see packets (that should match what USB transfers)
+
+```shell script
+btmon
 ```
