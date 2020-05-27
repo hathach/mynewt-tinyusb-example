@@ -12,14 +12,12 @@ jobs:
     steps:
     - name: Setup Python
       uses: actions/setup-python@v1
-      run: python --version
 
     - name: Setup Node.js
       uses: actions/setup-node@v1.1.0
       
     - name: Setup Go
       uses: actions/setup-go@v2
-      run: go version
       
     - name: Install Toolchains
       env:
