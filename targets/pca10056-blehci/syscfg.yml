@@ -1,0 +1,8 @@
+syscfg.vals:
+    BLE_EXT_ADV: 1
+    BLE_HCI_TRANSPORT: usb
+    BLE_MAX_CONNECTIONS: 20
+    BLE_PUBLIC_DEV_ADDR: "(uint8_t[6]){0x20, 0x20, 0x10, 0x10, 0xBB, 0xCC}"
+    USBD_BTH: 1
+    USBD_PID: 0x1234
+    USBD_VID: 0x5678

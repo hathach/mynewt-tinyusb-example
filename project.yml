@@ -43,4 +43,4 @@ repository.tinyusb:
     type: github
     vers: 0.0.0
     user: hathach
-    repo: tinyusb    
+    repo: tinyusb
