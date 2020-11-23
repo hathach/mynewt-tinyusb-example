@@ -38,7 +38,7 @@ jobs:
     - name: Install newt
       run: |
         mynewt-newt/build.sh
-        echo "::add-path::$GITHUB_WORKSPACE/mynewt-newt/newt"
+        echo "$GITHUB_WORKSPACE/mynewt-newt/newt" >> $GITHUB_PATH
         mynewt-newt/newt/newt version
 
     - name: Build
