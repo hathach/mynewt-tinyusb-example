@@ -44,8 +44,6 @@ jobs:
     - name: Build
       run: |
         newt upgrade
-        # Remove tinyusb submodule of pico-sdk
-        rm -r $GITHUB_WORKSPACE/repos/tinyusb/hw/mcu/raspberrypi/pico-sdk/lib/tinyusb
         newt build ${{ matrix.example }}-cdc_msc
         newt build ${{ matrix.example }}-msc_dual_lun
         newt build ${{ matrix.example }}-blehci
