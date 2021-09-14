@@ -24,7 +24,7 @@ jobs:
         # Install ARM GCC
         npm install --global xpm
         xpm install --global @xpack-dev-tools/arm-none-eabi-gcc@latest
-        echo `echo $HOME/opt/xPacks/@xpack-dev-tools/arm-none-eabi-gcc/*/.content/bin` >> $GITHUB_PATH
+        echo `echo $HOME/.local/xPacks/@xpack-dev-tools/arm-none-eabi-gcc/*/.content/bin` >> $GITHUB_PATH
               
     - name: Checkout code
       uses: actions/checkout@v2
@@ -43,9 +43,7 @@ jobs:
 
     - name: Build
       run: |
-        newt upgrade
-        # Remove tinyusb submodule of pico-sdk
-        rm -r $GITHUB_WORKSPACE/repos/tinyusb/hw/mcu/raspberrypi/pico-sdk/lib/tinyusb
+        newt upgrade -f
         newt build ${{ matrix.example }}-cdc_msc
         newt build ${{ matrix.example }}-msc_dual_lun
         newt build ${{ matrix.example }}-blehci
