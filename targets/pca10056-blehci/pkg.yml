@@ -6,3 +6,4 @@ pkg.homepage:
 
 pkg.deps:
     - "@apache-mynewt-core/hw/usb/tinyusb/std_descriptors"
+    - "@apache-mynewt-core/hw/usb/tinyusb/dfu"
