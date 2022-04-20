@@ -11,13 +11,13 @@ jobs:
         example: ['pca10056']
     steps:
     - name: Setup Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
 
     - name: Setup Node.js
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       
     - name: Setup Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       
     - name: Install Toolchains
       run: |
