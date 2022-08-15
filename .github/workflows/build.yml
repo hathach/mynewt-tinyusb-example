@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        example: ['pca10056']
+        board: ['pca10056']
     steps:
     - name: Setup Python
       uses: actions/setup-python@v3
@@ -30,7 +30,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Checkout mynewt-newt
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
          repository: apache/mynewt-newt
          path: mynewt-newt
@@ -44,6 +44,6 @@ jobs:
     - name: Build
       run: |
         newt upgrade -f
-        newt build ${{ matrix.example }}-cdc_msc
-        newt build ${{ matrix.example }}-msc_dual_lun
-        newt build ${{ matrix.example }}-blehci
+        newt build ${{ matrix.board }}-cdc_msc
+        newt build ${{ matrix.board }}-msc_dual_lun
+        newt build ${{ matrix.board }}-blehci
