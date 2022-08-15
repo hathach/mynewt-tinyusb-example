@@ -19,15 +19,13 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v3
       
-    - name: Install Toolchains
-      run: |
-        # Install ARM GCC
-        npm install --global xpm
-        xpm install --global @xpack-dev-tools/arm-none-eabi-gcc@latest
-        echo `echo $HOME/.local/xPacks/@xpack-dev-tools/arm-none-eabi-gcc/*/.content/bin` >> $GITHUB_PATH
-              
+    - name: Install ARM GCC
+      uses: carlosperate/arm-none-eabi-gcc-action@v1
+      with:
+        release: '11.2-2022.02'
+
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Checkout mynewt-newt
       uses: actions/checkout@v3
@@ -43,7 +41,7 @@ jobs:
 
     - name: Build
       run: |
-        newt upgrade -f
+        newt upgrade
         newt build ${{ matrix.board }}-cdc_msc
         newt build ${{ matrix.board }}-msc_dual_lun
         newt build ${{ matrix.board }}-blehci
