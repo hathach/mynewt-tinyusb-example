@@ -11,13 +11,13 @@ jobs:
         board: ['pca10056']
     steps:
     - name: Setup Python
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
 
     - name: Setup Node.js
       uses: actions/setup-node@v3
       
     - name: Setup Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v4
       
     - name: Install ARM GCC
       uses: carlosperate/arm-none-eabi-gcc-action@v1
