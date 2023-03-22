@@ -1,6 +1,6 @@
 # mynewt-tinyusb-example
 
-![tinyUSB_240x100](https://user-images.githubusercontent.com/249515/62646655-f9393200-b978-11e9-9c53-484862f15503.png)
+![TinyUSB Logo](https://raw.githubusercontent.com/hathach/tinyusb/master/docs/assets/logo.svg)
 
 [![Build Status](https://github.com/hathach/mynewt-tinyusb-example/workflows/Build/badge.svg)](https://github.com/hathach/mynewt-tinyusb-example/actions) [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 
