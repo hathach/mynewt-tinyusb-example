@@ -7,3 +7,7 @@ pkg.homepage:
 pkg.deps:
     - "@apache-mynewt-core/hw/usb/tinyusb"
     - "@apache-mynewt-core/hw/usb/tinyusb/std_descriptors"
+
+pkg.cflags:
+    - "-DNRFX_POWER_ENABLED=1"
+    - "-DNRFX_CLOCK_ENABLED=1"
