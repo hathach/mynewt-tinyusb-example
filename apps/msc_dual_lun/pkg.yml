@@ -15,3 +15,6 @@ pkg.deps:
 
 pkg.cflags: 
     - "-I@tinyusb/src"
+    - "-Iapps/msc_dual_lun/src"
+    - "-DNRFX_POWER_ENABLED=1"
+    - "-DNRFX_CLOCK_ENABLED=1"
