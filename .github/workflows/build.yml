@@ -25,7 +25,7 @@ jobs:
 
     - name: Install newt
       run: |
-        wget --progress=dot:giga https://www.apache.org/dyn/closer.lua/mynewt/apache-mynewt-${{ env.MYNEWT_VERSION }}/apache-mynewt-newt-bin-linux-${{ env.MYNEWT_VERSION }}.tgz -O mynewt-newt-bin.tgz
+        wget --progress=dot:giga https://www.apache.org/dyn/closer.lua/mynewt/apache-mynewt-${{ env.MYNEWT_VERSION }}/apache-mynewt-newt-bin-linux-${{ env.MYNEWT_VERSION }}.tgz?action=download -O mynewt-newt-bin.tgz
         mkdir -p mynewt-newt
         tar -C mynewt-newt/ -xaf mynewt-newt-bin.tgz
         ls mynewt-newt/
